@@ -362,8 +362,8 @@ EXPLANATION:
             for cmd in commands:
                 try:
                     result = subprocess.run(
-                        cmd,
-                        shell=True,
+                        shlex.split(cmd),
+                        shell=False,
                         cwd=repo_path,
                         capture_output=True,
                         text=True,
