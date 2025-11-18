@@ -39,8 +39,6 @@ slack-sdk>=3.21.0
 
 # Async support
 aiofiles>=23.0.0
-# Async support
-aiofiles>=23.0.0
 
 # Database (optional, for metrics storage)
 sqlalchemy>=2.0.0

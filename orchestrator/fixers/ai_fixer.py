@@ -5,6 +5,7 @@ AI-powered fixer for automated issue resolution.
 import logging
 import os
 import re
+import shlex
 from typing import Dict, Any, List, Optional
 from pathlib import Path
 
@@ -33,7 +34,14 @@ class AIFixer:
         # Initialize LLM client
         self.client = self._init_client()
 
-        logger.info(f"AIFixer initialized with provider: {self.provider}")
+        logger.info(f"AIFixer initialized with provider: {self.provider}, model: {self.model}, api_key: {self._mask_api_key(self.api_key)}")
+
+    @staticmethod
+    def _mask_api_key(api_key: str) -> str:
+        """Mask API key for logging, showing only last 4 characters."""
+        if not api_key or len(api_key) < 4:
+            return "****"
+        return f"****{api_key[-4:]}"
 
     def _init_client(self):
         """Initialize the LLM client based on provider."""
@@ -190,13 +198,13 @@ PRIORITY: [high/medium/low]
                 if issue.strip().startswith("-")
             ]
 
-        fixes_match = re.search(r"SUGGESTED FIXES:\s*\n(.*?)\n\n", response, re.DOTALL)
+        fixes_match = re.search(r"SUGGESTED FIXES:\s*\n(.*?)(?:\n\n|$)", response, re.DOTALL)
         if fixes_match:
             fixes_text = fixes_match.group(1)
             analysis["suggestions"] = [
-                fix.strip("0123456789. ").strip()
+                re.sub(r'^\d+\.\s*', '', fix.strip())
                 for fix in fixes_text.split("\n")
-                if re.match(r"^\d+\.", fix.strip())
+                if re.match(r'^\d+\.', fix.strip())
             ]
 
         priority_match = re.search(r"PRIORITY:\s*(\w+)", response, re.IGNORECASE)
