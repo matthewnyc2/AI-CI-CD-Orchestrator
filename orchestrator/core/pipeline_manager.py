@@ -87,7 +87,11 @@ class PipelineExecutor:
         repo_path = os.path.join(self.workspace, "repo")
 
         # Clean existing directory
+        # Clean existing directory - validate path first
         if os.path.exists(repo_path):
+            # Ensure repo_path is within workspace to prevent directory traversal
+            if not os.path.commonpath([repo_path, self.workspace]) == self.workspace:
+                return {"success": False, "error": "Invalid repository path"}
             shutil.rmtree(repo_path)
 
         logger.info(f"Cloning {repo_url} (branch: {branch})")
