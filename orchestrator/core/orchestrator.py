@@ -262,9 +262,6 @@ class CICDOrchestrator:
             "repo_path": self.repo_path
         }
 
-        # Start monitoring
-        self.pipeline_monitor.track_pipeline_start(pipeline_type)
-
         # Execute pipeline
         try:
             result = self.pipeline_manager.execute_pipeline(
@@ -272,10 +269,24 @@ class CICDOrchestrator:
                 pipeline_def,
                 context
             )
+            
+            # Get pipeline ID from result
+            pipeline_id = result.get("id", "unknown")
+            start_time = result.get("start_time")
+            end_time = result.get("end_time")
+            
+            # Calculate duration if both timestamps available
+            duration = 0.0
+            if start_time and end_time:
+                duration = (end_time - start_time).total_seconds()
+
+            # Track pipeline start (retroactively with ID)
+            self.pipeline_monitor.track_pipeline_start(pipeline_id, pipeline_type)
 
             # Track completion
             success = result.get("status") == PipelineStatus.SUCCESS
-            self.pipeline_monitor.track_pipeline_end(pipeline_type, success)
+            status_str = "success" if success else "failure"
+            self.pipeline_monitor.track_pipeline_end(pipeline_id, status_str, duration)
 
             if success:
                 self.alerter.send_alert(
@@ -294,7 +305,7 @@ class CICDOrchestrator:
 
         except Exception as e:
             logger.error(f"Pipeline {pipeline_type} failed with exception: {e}")
-            self.pipeline_monitor.track_pipeline_end(pipeline_type, False)
+            # Cannot track end without pipeline_id in this case - pipeline never started properly
 
             self.alerter.send_alert(
                 f"{pipeline_type.title()} Pipeline Error",

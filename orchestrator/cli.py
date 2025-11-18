@@ -80,21 +80,16 @@ def start(config, daemon):
 
         if daemon:
             console.print("[yellow]Running in daemon mode. Press Ctrl+C to stop.[/yellow]")
-            # Keep running
-            # Keep running - cross-platform approach
-            try:
-                signal.pause()
-            except AttributeError:
-                # signal.pause() not available on Windows
-                import time
-                while True:
-                    time.sleep(1)
         else:
             console.print("[yellow]Orchestrator started. Press Ctrl+C to stop.[/yellow]")
-            # Keep the main thread alive
-            import time
+        
+        # Keep running - cross-platform approach
+        import time
+        try:
             while True:
                 time.sleep(1)
+        except KeyboardInterrupt:
+            pass  # Signal handler will manage shutdown
 
     except FileNotFoundError as e:
         console.print(f"[red]Error: {e}[/red]")

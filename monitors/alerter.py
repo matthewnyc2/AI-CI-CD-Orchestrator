@@ -3,14 +3,23 @@ Alert system for CI/CD events and failures.
 """
 
 import logging
-from typing import Dict, Any, List
+from enum import Enum
+from typing import Dict, Any, List, Union
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
 
-class AlertLevel:
+class AlertSeverity(Enum):
     """Alert severity levels."""
+    INFO = "info"
+    WARNING = "warning"
+    ERROR = "error"
+    CRITICAL = "critical"
+
+
+class AlertLevel:
+    """Alert severity levels (deprecated - use AlertSeverity enum)."""
     INFO = "info"
     WARNING = "warning"
     ERROR = "error"
@@ -33,16 +42,22 @@ class Alerter:
         self.alerts: List[Dict[str, Any]] = []
         logger.info("Alerter initialized")
     
-    def send_alert(self, level: str, title: str, message: str, metadata: Dict[str, Any] = None):
+    def send_alert(self, title: str, message: str, severity: Any, metadata: Dict[str, Any] = None):
         """
         Send an alert.
         
         Args:
-            level: Alert level (info, warning, error, critical)
             title: Alert title
             message: Alert message
+            severity: Alert severity (AlertSeverity enum or string: info, warning, error, critical)
             metadata: Additional metadata
         """
+        # Convert AlertSeverity enum to string if needed
+        if hasattr(severity, 'value'):
+            level = severity.value
+        else:
+            level = severity
+            
         alert = {
             "level": level,
             "title": title,
