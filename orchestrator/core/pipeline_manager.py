@@ -8,7 +8,7 @@ import uuid
 import os
 import shutil
 from enum import Enum
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 from datetime import datetime
 from pathlib import Path
 import git
