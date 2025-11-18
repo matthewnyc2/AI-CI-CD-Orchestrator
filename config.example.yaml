@@ -1,0 +1,176 @@
+# AI-CI-CD Orchestrator Configuration Example
+# Copy this file to config.yaml and update with your values
+
+project:
+  name: "my-project"
+  repository: "https://github.com/username/my-project"
+  branch: "main"
+  language: "python"  # python, javascript, java, go, etc.
+  workspace: "/tmp/ai-cicd-workspace"
+
+orchestrator:
+  # How often to check for code changes (in seconds)
+  polling_interval: 60
+
+  # Maximum number of parallel pipelines
+  max_parallel_pipelines: 3
+
+  # Auto-fix failures using AI
+  auto_fix_enabled: true
+
+  # Maximum number of fix attempts before giving up
+  max_fix_attempts: 3
+
+  # Enable zero-downtime deployments
+  zero_downtime: true
+
+git:
+  # Git polling settings
+  monitor_enabled: true
+
+  # Branches to monitor (empty = all branches)
+  monitored_branches:
+    - "main"
+    - "develop"
+
+  # Ignore commits from these authors
+  ignore_authors: []
+
+llm:
+  # LLM provider: "openai" or "anthropic"
+  provider: "anthropic"
+
+  # Model to use for AI fixes
+  model: "claude-3-5-sonnet-20241022"
+
+  # API key (use environment variable recommended)
+  api_key: "${ANTHROPIC_API_KEY}"
+
+  # Alternative OpenAI configuration
+  # provider: "openai"
+  # model: "gpt-4-turbo-preview"
+  # api_key: "${OPENAI_API_KEY}"
+
+  # Maximum tokens for LLM responses
+  max_tokens: 4000
+
+  # Temperature for AI responses (0.0 - 1.0)
+  temperature: 0.2
+
+  # Timeout for LLM requests (seconds)
+  timeout: 60
+
+pipelines:
+  build:
+    enabled: true
+    timeout: 1800  # 30 minutes
+    retry_on_failure: true
+    max_retries: 2
+
+  test:
+    enabled: true
+    timeout: 3600  # 60 minutes
+    retry_on_failure: false
+    parallel_execution: true
+
+  deploy:
+    enabled: true
+    timeout: 1800  # 30 minutes
+    require_approval: false  # Set to true for manual approval
+    environments:
+      - name: "staging"
+        auto_deploy: true
+      - name: "production"
+        auto_deploy: false  # Manual approval for production
+
+monitoring:
+  # Enable pipeline monitoring
+  enabled: true
+
+  # Metrics collection
+  collect_metrics: true
+
+  # Metrics storage (can be "memory", "file", or "database")
+  metrics_storage: "file"
+  metrics_file: "metrics/pipeline_metrics.json"
+
+  # Health check interval (seconds)
+  health_check_interval: 30
+
+  # Alert thresholds
+  failure_rate_threshold: 0.2  # Alert if >20% of pipelines fail
+  duration_threshold_multiplier: 2.0  # Alert if pipeline takes 2x average
+
+alerts:
+  # Enable alerting
+  enabled: true
+
+  # Alert channels
+  channels:
+    - "console"
+    - "email"
+    # - "slack"
+
+  # Email configuration
+  email:
+    smtp_host: "smtp.gmail.com"
+    smtp_port: 587
+    smtp_user: "${SMTP_USER}"
+    smtp_password: "${SMTP_PASSWORD}"
+    from_address: "ai-cicd@example.com"
+    recipients:
+      - "team@example.com"
+
+  # Slack configuration
+  slack:
+    webhook_url: "${SLACK_WEBHOOK_URL}"
+    channel: "#ci-cd-alerts"
+    username: "AI-CICD Bot"
+
+  # Alert severity levels to send
+  min_severity: "warning"  # info, warning, error, critical
+
+logging:
+  # Logging level
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+
+  # Log format
+  format: "json"  # json, text, colored
+
+  # Log output
+  output: "both"  # console, file, both
+
+  # Log file configuration
+  log_file: "logs/orchestrator.log"
+  max_file_size: 10485760  # 10 MB
+  backup_count: 5
+
+database:
+  # Database for metrics and state (optional)
+  enabled: false
+
+  # Database URL (SQLAlchemy format)
+  url: "sqlite:///orchestrator.db"
+  # url: "postgresql://user:password@localhost/ai_cicd"
+
+  # Connection pool settings
+  pool_size: 5
+  max_overflow: 10
+
+security:
+  # Secure handling of secrets
+  secrets_manager: "env"  # env, file, vault
+
+  # Allowed IP addresses for webhooks (empty = all)
+  allowed_ips: []
+
+  # Enable API authentication
+  api_auth_enabled: false
+  api_key: "${API_KEY}"
+
+features:
+  # Experimental features
+  ai_code_review: false
+  predictive_failure_detection: false
+  auto_rollback: true
+  canary_deployments: false
