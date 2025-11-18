@@ -13,8 +13,8 @@ from .pipeline_manager import PipelineManager, PipelineType, PipelineStatus
 from ..fixers.ai_fixer import AIFixer
 from ..fixers.build_fixer import BuildFixer
 from ..fixers.test_fixer import TestFixer
-from ..monitors.pipeline_monitor import PipelineMonitor
-from ..monitors.alerter import Alerter, AlertSeverity
+from monitors.pipeline_monitor import PipelineMonitor
+from monitors.alerter import Alerter, AlertSeverity
 
 logger = logging.getLogger(__name__)
 
@@ -70,9 +70,9 @@ class CICDOrchestrator:
 
     def _load_pipeline_definitions(self) -> Dict[str, Dict[str, Any]]:
         """Load pipeline definitions."""
-        from ...pipelines.build.build_pipeline import build_pipeline
-        from ...pipelines.test.test_pipeline import test_pipeline
-        from ...pipelines.deploy.deploy_pipeline import deploy_pipeline
+        from pipelines.build.build_pipeline import build_pipeline
+        from pipelines.test.test_pipeline import test_pipeline
+        from pipelines.deploy.deploy_pipeline import deploy_pipeline
 
         return {
             "build": build_pipeline,
